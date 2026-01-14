@@ -9,6 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.ts",
+    "dev:all": "concurrently -n \"server,client\" -c \"blue,green\" \"npm run dev\" \"npm run dev --prefix client\"",
     "start": "ts-node src/server.ts"
   },
   "repository": {
@@ -36,6 +37,7 @@
     "@types/express": "^5.0.6",
     "@types/node": "^25.0.8",
     "@types/ws": "^8.5.12",
+    "concurrently": "^9.2.1",
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
