@@ -206,7 +206,8 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const data = await res.json();
             if (res.ok) {
                 // Reverse to show oldest first (API returns newest first for pagination)
-                setMessages(data.history.reverse());
+                // Use spread to avoid mutating original array (important for React StrictMode)
+                setMessages([...data.history].reverse());
                 setNextCursor(data.next_cursor);
                 setHasMoreMessages(!!data.next_cursor);
             }
@@ -230,7 +231,9 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const data = await res.json();
       if (res.ok) {
         // Prepend older messages to the beginning (reversed because API returns newest first)
-        setMessages((prev) => [...data.history.reverse(), ...prev]);
+        // Use spread to avoid mutating original array (important for React StrictMode)
+        const olderMessages = [...data.history].reverse();
+        setMessages((prev) => [...olderMessages, ...prev]);
         setNextCursor(data.next_cursor);
         setHasMoreMessages(!!data.next_cursor);
       }

@@ -1,5 +1,8 @@
-import express from "express";
+// Load .env FIRST before any imports that depend on environment variables
 import * as dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
 import connectDB from "./config/db";
 import cors from "cors";
 import { ConversationModel } from "./models/conversation.schema";
@@ -17,8 +20,6 @@ import http from "http";
 import { WebSocketServer } from "ws";
 import type { WebSocket } from "ws";
 import { Client } from "./services/client";
-
-dotenv.config();
 
 const app = express();
 const port = 3000;
