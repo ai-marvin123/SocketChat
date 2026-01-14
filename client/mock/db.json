@@ -1,0 +1,168 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "name": "Alice",
+      "avatar_color": "#EF4444"
+    },
+    {
+      "id": "u2",
+      "name": "Bob",
+      "avatar_color": "#3B82F6"
+    },
+    {
+      "id": "u3",
+      "name": "Charlie",
+      "avatar_color": "#22C55E"
+    },
+    {
+      "id": "u4",
+      "name": "David",
+      "avatar_color": "#EAB308"
+    }
+  ],
+  "conversations": [
+    {
+      "_id": "conv_group_1",
+      "conversation_type": "GROUP",
+      "participants": [
+        "u1",
+        "u2",
+        "u3"
+      ],
+      "conversation_name": "Project Team"
+    },
+    {
+      "_id": "conv_group_2",
+      "conversation_type": "GROUP",
+      "participants": [
+        "u1",
+        "u2",
+        "u3",
+        "u4"
+      ],
+      "conversation_name": "General Chat"
+    }
+  ],
+  "messages": [
+    {
+      "_id": "msg_1",
+      "conversation_id": "conv_group_1",
+      "sender_id": "u2",
+      "content": "Hey team! How's the project going?",
+      "created_at": "2026-01-13T10:00:00.000Z"
+    },
+    {
+      "_id": "msg_2",
+      "conversation_id": "conv_group_1",
+      "sender_id": "u3",
+      "content": "Going great! Just finished the frontend components.",
+      "created_at": "2026-01-13T10:01:00.000Z"
+    },
+    {
+      "_id": "msg_3",
+      "conversation_id": "conv_group_1",
+      "sender_id": "u1",
+      "content": "Awesome work Charlie! 🎉",
+      "created_at": "2026-01-13T10:02:00.000Z"
+    },
+    {
+      "_id": "msg_4",
+      "conversation_id": "conv_group_1",
+      "sender_id": "u2",
+      "content": "Can't wait to integrate with the backend.",
+      "created_at": "2026-01-13T10:03:00.000Z"
+    },
+    {
+      "_id": "msg_5",
+      "conversation_id": "conv_group_1",
+      "sender_id": "u1",
+      "content": "Let me know if you need any help with the API.",
+      "created_at": "2026-01-13T10:04:00.000Z"
+    },
+    {
+      "_id": "msg_6",
+      "conversation_id": "conv_group_2",
+      "sender_id": "u4",
+      "content": "Good morning everyone!",
+      "created_at": "2026-01-13T09:00:00.000Z"
+    },
+    {
+      "_id": "msg_7",
+      "conversation_id": "conv_group_2",
+      "sender_id": "u1",
+      "content": "Morning David! ☕",
+      "created_at": "2026-01-13T09:01:00.000Z"
+    },
+    {
+      "_id": "msg_8",
+      "conversation_id": "conv_group_2",
+      "sender_id": "u2",
+      "content": "Hey! Ready for another productive day?",
+      "created_at": "2026-01-13T09:02:00.000Z"
+    },
+    {
+      "_id": "msg_9",
+      "conversation_id": "conv_group_2",
+      "sender_id": "u3",
+      "content": "Always! Let's do this.",
+      "created_at": "2026-01-13T09:03:00.000Z"
+    },
+    {
+      "_id": "msg_10",
+      "conversation_id": "conv_group_2",
+      "sender_id": "u4",
+      "content": "Any updates on the SocketChat project?",
+      "created_at": "2026-01-13T09:04:00.000Z"
+    },
+    {
+      "_id": "msg_fee5ae96-12d2-486e-a99d-0e56d7ce80b1",
+      "conversation_id": "dm_u1_u4",
+      "sender_id": "u1",
+      "content": "sfdsfsd fds",
+      "created_at": "2026-01-14T05:45:06.685Z"
+    },
+    {
+      "_id": "msg_6f8dbd3e-dba5-4ab5-9a12-ee7626d576af",
+      "conversation_id": "dm_u1_u4",
+      "sender_id": "u1",
+      "content": "sdfsdfsd",
+      "created_at": "2026-01-14T05:45:07.761Z"
+    },
+    {
+      "_id": "msg_88ae264f-e5d1-4228-8db2-057700391dc0",
+      "conversation_id": "dm_u1_u4",
+      "sender_id": "u1",
+      "content": "fsdfsdfsd",
+      "created_at": "2026-01-14T05:45:09.114Z"
+    },
+    {
+      "_id": "msg_70c715c2-c1e8-4d7d-b637-aac99539f6cb",
+      "conversation_id": "dm_u1_u4",
+      "sender_id": "u1",
+      "content": "sdfsdf",
+      "created_at": "2026-01-14T05:45:10.257Z"
+    },
+    {
+      "_id": "msg_30bfac4f-f933-45ff-a994-0e9c64c6ab1b",
+      "conversation_id": "conv_group_2",
+      "sender_id": "u1",
+      "content": "sdf dsfdsf",
+      "created_at": "2026-01-14T05:45:14.519Z"
+    },
+    {
+      "_id": "msg_628220e7-ac31-4bcf-b15c-d9d959943d77",
+      "conversation_id": "conv_group_2",
+      "sender_id": "u1",
+      "content": "sdfsd fs",
+      "created_at": "2026-01-14T05:45:15.847Z"
+    },
+    {
+      "_id": "msg_02b81b97-53f5-46de-84b0-2242e31e3f99",
+      "conversation_id": "conv_group_1",
+      "sender_id": "u2",
+      "content": "sdfdsfs",
+      "created_at": "2026-01-14T05:45:31.128Z"
+    }
+  ]
+}
