@@ -10,6 +10,8 @@ import type {
 } from "./types/chat";
 import { MessageModel } from "./models/message.schema";
 import mongoose from "mongoose";
+import {connectRedis} from "./config/redis";
+
 dotenv.config();
 
 const app = express();
@@ -22,7 +24,11 @@ const startDB = async () => {
   });
 };
 
+// START DATABASE
 startDB();
+
+// CONNECT REDIS
+connectRedis();
 
 app.use(cors());
 app.use(express.json());

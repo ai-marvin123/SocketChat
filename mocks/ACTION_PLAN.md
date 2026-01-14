@@ -19,9 +19,9 @@ This document outlines the step-by-step plan to implement SocketChat based on `d
   - [x] Create `Message` schema.
 - [x] **REST Implementation**
   - [x] Implement `POST /chat/group` (Create Group).
-  - [ ] Implement `POST /chat/message` (Send Message logic - DB part only).
-  - [ ] Implement `GET /chat/history` (Pagination logic).
-  - [ ] **Verification**: Test endpoints with Postman/curl.
+  - [x] Implement `POST /chat/message` (Send Message logic - DB part only).
+  - [x] Implement `GET /chat/history` (Pagination logic).
+  - [x] **Verification**: Test endpoints with Postman/curl.
 
 ## Phase 2: Real-time Layer (Redis + WebSocket)
 
@@ -30,9 +30,9 @@ This document outlines the step-by-step plan to implement SocketChat based on `d
 ### Checklist
 
 - [ ] **Redis Setup**
-  - [ ] Install `redis` (client).
-  - [ ] Create Redis Client singleton.
-  - [ ] Implement Pub/Sub helper classes.
+  - [x] Install `redis` (client).
+  - [x] Create Redis Client singleton.
+  - [x] Implement Pub/Sub helper classes.
 - [ ] **WebSocket Server**
   - [ ] Install `ws` library.
   - [ ] Initialize `WebSocketServer` attached to HTTP server.
