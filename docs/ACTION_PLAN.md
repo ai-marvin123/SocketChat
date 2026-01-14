@@ -34,16 +34,16 @@ This document outlines the step-by-step plan to implement SocketChat based on `d
   - [x] Create Redis Client singleton.
   - [x] Implement Pub/Sub helper classes.
 - [ ] **WebSocket Server**
-  - [ ] Install `ws` library.
-  - [ ] Initialize `WebSocketServer` attached to HTTP server.
-  - [ ] Implement `Client` class to wrap `ws` connection with `userId`.
+  - [x] Install `ws` library.
+  - [x] Initialize `WebSocketServer` attached to HTTP server.
+  - [x] Implement `Client` class to wrap `ws` connection with `userId`.
 - [ ] **Messaging Logic**
-  - [ ] Connect `POST /chat/message` to WebSocket Broadcaster.
-  - [ ] Implement `NEW_MESSAGE` event broadcast.
+  - [x] Connect `POST /chat/message` to WebSocket Broadcaster.
+  - [x] Implement `NEW_MESSAGE` event broadcast.
 - [ ] **Presence/Heartbeat System**
-  - [ ] Implement `HEARTBEAT` handler.
-  - [ ] Redis keys: `SET user:{id}:online "1" EX 10`.
-  - [ ] Implement Presence Monitoring (Interval or Keyspace Notifications) to trigger `PRESENCE_UPDATE`.
+  - [x] Implement `HEARTBEAT` handler.
+  - [x] Redis keys: `SET user:{id}:online "1" EX 10`.
+  - [x] Implement Presence Monitoring (Interval or Keyspace Notifications) to trigger `PRESENCE_UPDATE`.
 
 ## Phase 3: Frontend Implementation
 

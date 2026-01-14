@@ -19,3 +19,7 @@ export interface GetHistoryResponse {
   }>;
   next_cursor: string | null; // Null if no more messages
 }
+
+export interface PresenceUpdatePayload {
+  onlineUsers: string[];
+}
