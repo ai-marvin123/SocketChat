@@ -61,6 +61,12 @@ wss.on("connection", (socket: WebSocket, request: http.IncomingMessage) => {
   clients.set(userId, client);
   console.log(`WebSocket connected: ${client.userId}`);
 
+  // Immediately broadcast online status on connect
+  redisClient.set(`user:${userId}:online`, "1", { EX: 10 }).then(() => {
+    presence.set(userId, "ONLINE");
+    broadcastPresence();
+  });
+
   socket.on("message", async (data) => {
     let parsed: { type?: string } | null = null;
     try {
@@ -75,10 +81,53 @@ wss.on("connection", (socket: WebSocket, request: http.IncomingMessage) => {
       presence.set(userId, "ONLINE");
       broadcastPresence();
     }
+
+    // Handle typing indicator events
+    if (parsed?.type === "TYPING_START" || parsed?.type === "TYPING_STOP") {
+      const payload = parsed as { type: string; payload?: { conversation_id?: string } };
+      const conversationId = payload.payload?.conversation_id;
+      
+      if (!conversationId) return;
+
+      // Determine participants based on conversation type
+      let participants: string[] = [];
+      
+      if (conversationId.startsWith("dm_")) {
+        // Direct message: extract user IDs from conversation ID
+        participants = conversationId.replace("dm_", "").split("_");
+      } else {
+        // Group chat: fetch from database
+        try {
+          const conversation = await ConversationModel.findById(conversationId);
+          if (conversation) {
+            participants = conversation.participants;
+          }
+        } catch (err) {
+          console.error("Error fetching conversation for typing:", err);
+        }
+      }
+
+      // Broadcast typing status to other participants (not the sender)
+      participants.forEach((pid) => {
+        if (pid !== userId) {
+          const client = clients.get(pid);
+          if (client) {
+            client.send({
+              type: parsed.type,
+              payload: { conversation_id: conversationId, user_id: userId },
+            });
+          }
+        }
+      });
+    }
   });
 
-  socket.on("close", () => {
+  socket.on("close", async () => {
     clients.delete(userId);
+    // Immediately broadcast offline status on disconnect
+    await redisClient.del(`user:${userId}:online`);
+    presence.set(userId, "OFFLINE");
+    broadcastPresence();
     console.log(`WebSocket disconnected: ${userId}`);
   });
 });

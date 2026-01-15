@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useSocket } from './SocketContext';
 import { useAuth } from './AuthContext';
-import type { Conversation, Message, WSEvent, NewMessagePayload, PresenceUpdatePayload } from '../types';
+import type { Conversation, Message, WSEvent, NewMessagePayload, PresenceUpdatePayload, TypingPayload } from '../types';
 import { API_BASE } from '../config';
 
 // Notification event info passed to callback
@@ -30,6 +30,8 @@ interface ChatContextType {
   loadMoreMessages: () => Promise<void>;  // Pagination: load older messages
   markAsRead: (conversationId: string) => void;  // Mark conversation as read
   onNewMessageNotification: (callback: (info: NotificationEventInfo) => void) => () => void;  // Subscribe to new message events
+  typingUsers: Map<string, Set<string>>;  // conversationId -> Set of userIds who are typing
+  sendTypingStatus: (isTyping: boolean) => void;  // Send typing indicator to current conversation
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -47,6 +49,8 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [unreadCounts, setUnreadCounts] = useState<Map<string, number>>(new Map());
+  const [typingUsers, setTypingUsers] = useState<Map<string, Set<string>>>(new Map());  // conversationId -> Set of typing userIds
+  const typingTimeoutRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());  // Track typing timeouts per user
   
   // Notification callbacks - stored in ref to avoid re-renders
   const [notificationCallbacks, setNotificationCallbacks] = useState<Set<(info: NotificationEventInfo) => void>>(new Set());
@@ -175,6 +179,67 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             });
             break;
           }
+
+          case 'TYPING_START': {
+            const typingPayload = data.payload as TypingPayload;
+            const { conversation_id, user_id } = typingPayload;
+            
+            // Add user to typing set for this conversation
+            setTypingUsers(prev => {
+              const newMap = new Map(prev);
+              const typingSet = new Set(newMap.get(conversation_id) || []);
+              typingSet.add(user_id);
+              newMap.set(conversation_id, typingSet);
+              return newMap;
+            });
+
+            // Auto-clear typing status after 3 seconds (in case TYPING_STOP is missed)
+            const timeoutKey = `${conversation_id}_${user_id}`;
+            const existingTimeout = typingTimeoutRef.current.get(timeoutKey);
+            if (existingTimeout) clearTimeout(existingTimeout);
+            
+            typingTimeoutRef.current.set(timeoutKey, setTimeout(() => {
+              setTypingUsers(prev => {
+                const newMap = new Map(prev);
+                const typingSet = new Set(newMap.get(conversation_id) || []);
+                typingSet.delete(user_id);
+                if (typingSet.size === 0) {
+                  newMap.delete(conversation_id);
+                } else {
+                  newMap.set(conversation_id, typingSet);
+                }
+                return newMap;
+              });
+            }, 3000));
+            break;
+          }
+
+          case 'TYPING_STOP': {
+            const typingPayload = data.payload as TypingPayload;
+            const { conversation_id, user_id } = typingPayload;
+            
+            // Remove user from typing set
+            setTypingUsers(prev => {
+              const newMap = new Map(prev);
+              const typingSet = new Set(newMap.get(conversation_id) || []);
+              typingSet.delete(user_id);
+              if (typingSet.size === 0) {
+                newMap.delete(conversation_id);
+              } else {
+                newMap.set(conversation_id, typingSet);
+              }
+              return newMap;
+            });
+
+            // Clear the auto-timeout if exists
+            const timeoutKey = `${conversation_id}_${user_id}`;
+            const existingTimeout = typingTimeoutRef.current.get(timeoutKey);
+            if (existingTimeout) {
+              clearTimeout(existingTimeout);
+              typingTimeoutRef.current.delete(timeoutKey);
+            }
+            break;
+          }
             
           default:
             break;
@@ -243,6 +308,16 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoadingMore(false);
     }
   };
+
+  // Send typing status to current conversation
+  const sendTypingStatus = useCallback((isTyping: boolean) => {
+    if (!socket || !currentConversation) return;
+    
+    socket.send(JSON.stringify({
+      type: isTyping ? 'TYPING_START' : 'TYPING_STOP',
+      payload: { conversation_id: currentConversation._id }
+    }));
+  }, [socket, currentConversation]);
 
   const sendMessage = async (content: string) => {
     if (!currentConversation || !currentUser) return;
@@ -318,7 +393,9 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         fetchGroups,
         loadMoreMessages,
         markAsRead,
-        onNewMessageNotification
+        onNewMessageNotification,
+        typingUsers,
+        sendTypingStatus
     }}>
       {children}
     </ChatContext.Provider>

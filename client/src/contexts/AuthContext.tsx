@@ -12,13 +12,15 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const HARDCODED_USERS: User[] = [
-  { id: 'u1', name: 'Alice', avatar_color: '#EF4444' },   // red-500
-  { id: 'u2', name: 'Bob', avatar_color: '#3B82F6' },     // blue-500
-  { id: 'u3', name: 'Charlie', avatar_color: '#22C55E' }, // green-500
-  { id: 'u4', name: 'David', avatar_color: '#EAB308' },   // yellow-500
+  { id: 'u1', name: 'Mari', avatar_color: '#EF4444' }, // red-500
+  { id: 'u2', name: 'Avo', avatar_color: '#3B82F6' }, // blue-500
+  { id: 'u3', name: 'John', avatar_color: '#22C55E' }, // green-500
+  { id: 'u4', name: 'Nam', avatar_color: '#EAB308' }, // yellow-500
 ];
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const login = (userId: string) => {
@@ -33,7 +35,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, availableUsers: HARDCODED_USERS }}>
+    <AuthContext.Provider
+      value={{ currentUser, login, logout, availableUsers: HARDCODED_USERS }}
+    >
       {children}
     </AuthContext.Provider>
   );

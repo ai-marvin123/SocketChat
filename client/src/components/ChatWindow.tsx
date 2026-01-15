@@ -1,17 +1,19 @@
-import { useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react';
 import { useChat } from '../contexts/ChatContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
 
 const ChatWindow: React.FC = () => {
     const { currentUser, availableUsers } = useAuth();
-    const { currentConversation, messages, sendMessage, onlineUsers, hasMoreMessages, isLoadingMore, loadMoreMessages } = useChat();
+    const { currentConversation, messages, sendMessage, onlineUsers, hasMoreMessages, isLoadingMore, loadMoreMessages, typingUsers, sendTypingStatus } = useChat();
     const { isConnected } = useSocket();
     const [inputValue, setInputValue] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const prevMessageCountRef = useRef<number>(0);
     const prevScrollHeightRef = useRef<number>(0);
+    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isTypingRef = useRef<boolean>(false);
 
     // Helper to get user name from ID
     const getUserName = (userId: string): string => {
@@ -61,8 +63,77 @@ const ChatWindow: React.FC = () => {
         e.preventDefault();
         if (!inputValue.trim() || !isConnected) return;
         
+        // Stop typing indicator when sending
+        if (isTypingRef.current) {
+            sendTypingStatus(false);
+            isTypingRef.current = false;
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+                typingTimeoutRef.current = null;
+            }
+        }
+        
         await sendMessage(inputValue);
         setInputValue('');
+    };
+
+    // Handle input change with typing indicator
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setInputValue(value);
+
+        // Send TYPING_START if not already typing
+        if (!isTypingRef.current && value.length > 0) {
+            sendTypingStatus(true);
+            isTypingRef.current = true;
+        }
+
+        // Clear existing timeout
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Set new timeout to send TYPING_STOP after 1.5s of inactivity
+        if (value.length > 0) {
+            typingTimeoutRef.current = setTimeout(() => {
+                sendTypingStatus(false);
+                isTypingRef.current = false;
+            }, 1500);
+        } else {
+            // Input is empty, stop typing
+            if (isTypingRef.current) {
+                sendTypingStatus(false);
+                isTypingRef.current = false;
+            }
+        }
+    }, [sendTypingStatus]);
+
+    // Cleanup typing timeout on unmount or conversation change
+    useEffect(() => {
+        return () => {
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+            if (isTypingRef.current) {
+                sendTypingStatus(false);
+            }
+        };
+    }, [currentConversation, sendTypingStatus]);
+
+    // Get names of users who are currently typing in this conversation
+    const getTypingUsersText = (): string | null => {
+        if (!currentConversation) return null;
+        const typingSet = typingUsers.get(currentConversation._id);
+        if (!typingSet || typingSet.size === 0) return null;
+        
+        const names = Array.from(typingSet)
+            .filter(id => id !== currentUser?.id)
+            .map(id => getUserName(id));
+        
+        if (names.length === 0) return null;
+        if (names.length === 1) return `${names[0]} is typing`;
+        if (names.length === 2) return `${names[0]} and ${names[1]} are typing`;
+        return `${names.slice(0, 2).join(', ')} and ${names.length - 2} more are typing`;
     };
 
     if (!currentConversation) {
@@ -207,11 +278,22 @@ const ChatWindow: React.FC = () => {
 
             {/* Input Area */}
             <div className="p-4 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 shrink-0">
+                {/* Typing Indicator */}
+                {getTypingUsersText() && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 ml-2 flex items-center gap-1">
+                        <span>{getTypingUsersText()}</span>
+                        <span className="typing-dots flex gap-0.5">
+                            <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                            <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                            <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                        </span>
+                    </div>
+                )}
                 <form onSubmit={handleSend} className="relative flex items-center max-w-4xl mx-auto">
                     <input
                         type="text"
                         value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
+                        onChange={handleInputChange}
                         placeholder="Type a message..."
                         className="w-full bg-gray-100 dark:bg-black border-none rounded-full py-3.5 pl-6 pr-14 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/50 transition-all outline-none"
                     />

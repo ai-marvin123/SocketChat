@@ -21,7 +21,7 @@ export interface Conversation {
 }
 
 // WebSocket Event Types
-export type WebSocketEventType = "NEW_MESSAGE" | "PRESENCE_UPDATE" | "HEARTBEAT" | "READ_RECEIPT";
+export type WebSocketEventType = "NEW_MESSAGE" | "PRESENCE_UPDATE" | "HEARTBEAT" | "READ_RECEIPT" | "TYPING_START" | "TYPING_STOP";
 
 export interface WSEvent<T = unknown> {
   type: WebSocketEventType;
@@ -38,6 +38,12 @@ export interface NewMessagePayload {
 
 export interface PresenceUpdatePayload {
   onlineUsers: string[];
+}
+
+// Typing indicator payload - sent when user starts/stops typing
+export interface TypingPayload {
+  conversation_id: string;
+  user_id: string;
 }
 
 // REST API Types

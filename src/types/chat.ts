@@ -23,3 +23,9 @@ export interface GetHistoryResponse {
 export interface PresenceUpdatePayload {
   onlineUsers: string[];
 }
+
+// Typing indicator payload - sent when user starts/stops typing
+export interface TypingPayload {
+  conversation_id: string;
+  user_id: string;
+}
